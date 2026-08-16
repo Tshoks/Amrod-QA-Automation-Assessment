@@ -39,11 +39,24 @@ Ensure the following are installed:
 ## Setup
 
 1. Clone the repository:
+
    ```bash
    git clone <repo-url>
    cd <repo-folder>
-   npm ci
+   npm install
    ```
+
+2. Run the full local validation sequence in one step:
+   ```bat
+   allTests.bat
+   ```
+   This batch file runs, in order:
+   - npm install
+   - npm run build
+   - npm run lint
+   - npm run format:check
+   - npx playwright test
+   - npx allure serve .\allure-results
 
 ## Running tests
 

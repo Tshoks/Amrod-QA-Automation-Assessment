@@ -16,8 +16,15 @@ export class BasePage {
   }
 
   private async captureFailureScreenshot(name: string): Promise<void> {
+    if (this.page.isClosed()) return;
+
     const screenshotName = `${this.sanitizeScreenshotName(name)}-${Date.now()}.png`;
-    await this.page.screenshot({ path: `./${screenshotName}`, fullPage: true });
+
+    try {
+      await this.page.screenshot({ path: `./${screenshotName}`, fullPage: true });
+    } catch {
+      // Best-effort screenshot capture; ignore if the page/context is already closed.
+    }
   }
 
   private formatError(action: string, locator: string, error: unknown): string {

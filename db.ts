@@ -225,10 +225,16 @@ export async function createDatabaseTables(): Promise<void> {
     });
   }
 
+  const currentBootstrapPromise = schemaBootstrapPromise;
+
   try {
-    await schemaBootstrapPromise;
-  } finally {
-    schemaBootstrapPromise = null;
+    await currentBootstrapPromise;
+  } catch (error) {
+    if (schemaBootstrapPromise === currentBootstrapPromise) {
+      schemaBootstrapPromise = null;
+    }
+
+    throw error;
   }
 }
 

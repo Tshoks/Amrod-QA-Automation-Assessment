@@ -20,16 +20,6 @@ echo Cleaning previous Allure artifacts...
 if exist ".\allure-results" rmdir /s /q ".\allure-results"
 if exist ".\allure-report" rmdir /s /q ".\allure-report"
 
-echo Running Playwright smoke tests...
-call npm run test:smoke > smoke-output.txt 2>&1
-set SMOKE_EXIT=%ERRORLEVEL%
-type smoke-output.txt
-findstr /C:"No tests found" smoke-output.txt >nul
-if not errorlevel 1 (
-    echo No tests found; skipping...
-)
-if %SMOKE_EXIT% neq 0 exit /b %SMOKE_EXIT%
-
 echo Running Playwright sanity tests...
 call npm run test:sanity > sanity-output.txt 2>&1
 set SANITY_EXIT=%ERRORLEVEL%
@@ -39,16 +29,6 @@ if not errorlevel 1 (
     echo No tests found; skipping...
 )
 if %SANITY_EXIT% neq 0 exit /b %SANITY_EXIT%
-
-echo Running Playwright regression tests...
-call npm run test:regression > regression-output.txt 2>&1
-set REGRESSION_EXIT=%ERRORLEVEL%
-type regression-output.txt
-findstr /C:"No tests found" regression-output.txt >nul
-if not errorlevel 1 (
-    echo No tests found; skipping...
-)
-if %REGRESSION_EXIT% neq 0 exit /b %REGRESSION_EXIT%
 
 echo Starting Allure report server...
 call npx allure serve .\allure-results

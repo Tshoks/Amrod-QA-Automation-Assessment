@@ -313,9 +313,17 @@ async function upsertNegativeTestData(
 export async function ensureDefaultLoginTestData(): Promise<void> {
   await createDatabaseTables();
 
+  const loginUrl = process.env.BASE_URL;
+
+  if (!loginUrl) {
+    throw new Error(
+      "Missing BASE_URL environment variable. Set BASE_URL to your OrangeHRM application URL before running tests.",
+    );
+  }
+
   await upsertPositiveTestData(
     "login.url",
-    process.env.BASE_URL ?? "https://opensource-demo.orangehrmlive.com",
+    loginUrl,
     "OrangeHRM login page URL",
   );
   await upsertPositiveTestData(

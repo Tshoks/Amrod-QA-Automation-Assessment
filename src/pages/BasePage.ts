@@ -39,6 +39,7 @@ export class BasePage {
     await test.step(`Click ${locator}`, async () => {
       try {
         await this.page.locator(locator).click();
+        await this.page.waitForTimeout(500);
       } catch (error) {
         await this.captureFailureScreenshot(`click-${locator}`);
         throw new Error(this.formatError("Click", locator, error));

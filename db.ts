@@ -276,6 +276,13 @@ export async function readEmployeeData(employeeId?: string): Promise<Record<stri
   return result.rows[0] ?? null;
 }
 
+const ALLOWED_EMPLOYEE_COLUMNS = new Set([
+  'first_name',
+  'middle_name',
+  'last_name',
+  'employee_code',
+]);
+
 export async function writeEmployeeData(
   employeeId: string,
   payload: Record<string, unknown>,
@@ -288,6 +295,11 @@ export async function writeEmployeeData(
 
   if (keys.length === 0) {
     return { employee_id: employeeId };
+  }
+
+  const invalidKeys = keys.filter((key) => !ALLOWED_EMPLOYEE_COLUMNS.has(key));
+  if (invalidKeys.length > 0) {
+    throw new Error(`Invalid employee column(s): ${invalidKeys.join(', ')}`);
   }
 
   const columns = keys.map((key) => `"${key}"`).join(', ');

@@ -1,0 +1,340 @@
+import { Pool, QueryResultRow } from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const DEFAULT_NEON_CONNECTION_STRING =
+  'postgresql://neondb_owner:npg_e6mRABlgEDd4@ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+
+export const CREATE_TABLES_SQL = `
+  CREATE TABLE IF NOT EXISTS employees (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    last_name VARCHAR(100) NOT NULL,
+    full_name VARCHAR(300) GENERATED ALWAYS AS (first_name || ' ' || middle_name || ' ' || last_name) STORED,
+    employee_code VARCHAR(50) UNIQUE,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS personal_details (
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
+    nationality VARCHAR(100),
+    marital_status VARCHAR(50),
+    date_of_birth DATE,
+    gender VARCHAR(20),
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS job_details (
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
+    joined_date DATE,
+    job_title VARCHAR(100),
+    job_category VARCHAR(100),
+    sub_unit VARCHAR(100),
+    location VARCHAR(100),
+    employment_status VARCHAR(100),
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS attachments (
+    id SERIAL PRIMARY KEY,
+    employee_id INT REFERENCES employees(id),
+    file_name VARCHAR(255),
+    file_type VARCHAR(50),
+    file_url TEXT,
+    uploaded_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE IF NOT EXISTS test_data_positive (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(100) UNIQUE,
+    value TEXT,
+    description TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS test_data_negative (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(100) UNIQUE,
+    value TEXT,
+    expected_error TEXT,
+    description TEXT
+  );
+`;
+
+interface LoginTestData {
+  url: string;
+  username: string;
+  password: string;
+}
+
+interface LoginNegativeTestData {
+  url: string;
+  invalidUsername: string;
+  invalidPassword: string;
+  invalidCredentialsMessage: string;
+  requiredFieldMessage: string;
+}
+
+interface DbConfig {
+  connectionString?: string;
+  host?: string;
+  port?: number;
+  database?: string;
+  user?: string;
+  password?: string;
+}
+
+const getDbConfig = (): DbConfig => {
+  if (process.env.DATABASE_URL) {
+    return { connectionString: process.env.DATABASE_URL };
+  }
+
+  if (process.env.NEON_CONNECTION_STRING) {
+    return { connectionString: process.env.NEON_CONNECTION_STRING };
+  }
+
+  if (DEFAULT_NEON_CONNECTION_STRING) {
+    return { connectionString: DEFAULT_NEON_CONNECTION_STRING };
+  }
+
+  return {
+    host: process.env.DB_HOST ?? 'localhost',
+    port: Number(process.env.DB_PORT ?? 5432),
+    database: process.env.DB_NAME ?? 'orangehrm',
+    user: process.env.DB_USER ?? 'postgres',
+    password: process.env.DB_PASSWORD ?? 'postgres',
+  };
+};
+
+const dbConfig = getDbConfig();
+
+const pool = new Pool({
+  ...dbConfig,
+  ssl:
+    dbConfig.connectionString?.includes('sslmode=require') || process.env.PGSSLMODE === 'require'
+      ? { rejectUnauthorized: false }
+      : undefined,
+});
+
+export async function createDatabaseTables(): Promise<void> {
+  await pool.query(CREATE_TABLES_SQL);
+}
+
+async function upsertPositiveTestData(
+  key: string,
+  value: string,
+  description: string,
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO test_data_positive (key, value, description)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, description = EXCLUDED.description`,
+    [key, value, description],
+  );
+}
+
+async function upsertNegativeTestData(
+  key: string,
+  value: string,
+  expectedError: string,
+  description: string,
+): Promise<void> {
+  await pool.query(
+    `INSERT INTO test_data_negative (key, value, expected_error, description)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, expected_error = EXCLUDED.expected_error, description = EXCLUDED.description`,
+    [key, value, expectedError, description],
+  );
+}
+
+export async function ensureDefaultLoginTestData(): Promise<void> {
+  await createDatabaseTables();
+
+  await upsertPositiveTestData(
+    'login.url',
+    process.env.BASE_URL ?? 'https://opensource-demo.orangehrmlive.com',
+    'OrangeHRM login page URL',
+  );
+  await upsertPositiveTestData('login.username', 'Admin', 'Valid OrangeHRM username');
+  await upsertPositiveTestData('login.password', 'admin123', 'Valid OrangeHRM password');
+}
+
+export async function ensureDefaultLoginNegativeTestData(): Promise<void> {
+  await createDatabaseTables();
+
+  await upsertNegativeTestData(
+    'login.invalid.username',
+    'InvalidAdmin',
+    'Invalid credentials',
+    'Invalid OrangeHRM username for negative login test',
+  );
+  await upsertNegativeTestData(
+    'login.invalid.password',
+    'InvalidPassword123',
+    'Invalid credentials',
+    'Invalid OrangeHRM password for negative login test',
+  );
+  await upsertNegativeTestData(
+    'login.invalid.credentials.message',
+    'Invalid credentials',
+    'Invalid credentials',
+    'Expected login error message for invalid credentials',
+  );
+  await upsertNegativeTestData(
+    'login.required.message',
+    'Required',
+    'Required',
+    'Expected validation error message for required username and password fields',
+  );
+}
+
+export async function getPositiveTestDataValue(key: string): Promise<string> {
+  await createDatabaseTables();
+
+  const result = await pool.query<QueryResultRow>(
+    'SELECT value FROM test_data_positive WHERE key = $1',
+    [key],
+  );
+
+  const value = result.rows[0]?.value;
+
+  if (!value) {
+    throw new Error(`Missing required positive test data for key: ${key}`);
+  }
+
+  return String(value);
+}
+
+export async function getNegativeTestDataValue(key: string): Promise<string> {
+  await createDatabaseTables();
+
+  const result = await pool.query<QueryResultRow>(
+    'SELECT value FROM test_data_negative WHERE key = $1',
+    [key],
+  );
+
+  const value = result.rows[0]?.value;
+
+  if (value === undefined || value === null) {
+    throw new Error(`Missing required negative test data for key: ${key}`);
+  }
+
+  return String(value);
+}
+
+export async function getLoginTestData(): Promise<LoginTestData> {
+  await ensureDefaultLoginTestData();
+
+  const [url, username, password] = await Promise.all([
+    getPositiveTestDataValue('login.url'),
+    getPositiveTestDataValue('login.username'),
+    getPositiveTestDataValue('login.password'),
+  ]);
+
+  return { url, username, password };
+}
+
+export async function getLoginNegativeTestData(): Promise<LoginNegativeTestData> {
+  await ensureDefaultLoginNegativeTestData();
+
+  const [url, invalidUsername, invalidPassword, invalidCredentialsMessage, requiredFieldMessage] =
+    await Promise.all([
+      getPositiveTestDataValue('login.url'),
+      getNegativeTestDataValue('login.invalid.username'),
+      getNegativeTestDataValue('login.invalid.password'),
+      getNegativeTestDataValue('login.invalid.credentials.message'),
+      getNegativeTestDataValue('login.required.message'),
+    ]);
+
+  return {
+    url,
+    invalidUsername,
+    invalidPassword,
+    invalidCredentialsMessage,
+    requiredFieldMessage,
+  };
+}
+
+export async function connectDb(): Promise<void> {
+  await pool.query('SELECT 1');
+}
+
+export async function readEmployeeData(employeeId?: string): Promise<Record<string, unknown> | null> {
+  const resolvedId = employeeId ?? process.env.CURRENT_EMPLOYEE_ID ?? null;
+
+  if (!resolvedId) {
+    return null;
+  }
+
+  const result = await pool.query<QueryResultRow>(
+    'SELECT * FROM employees WHERE employee_id = $1',
+    [resolvedId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+export async function writeEmployeeData(
+  employeeId: string,
+  payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  if (!employeeId) {
+    throw new Error('Employee ID is required to write employee data.');
+  }
+
+  const keys = Object.keys(payload);
+
+  if (keys.length === 0) {
+    return { employee_id: employeeId };
+  }
+
+  const columns = keys.map((key) => `"${key}"`).join(', ');
+  const insertValues = keys.map((_, index) => `$${index + 2}`).join(', ');
+  const updateSet = keys
+    .map((key, index) => `"${key}" = $${index + 2}`)
+    .join(', ');
+
+  const params = [employeeId, ...keys.map((key) => payload[key])];
+
+  await pool.query(
+    `INSERT INTO employees (employee_id, ${columns}) VALUES ($1, ${insertValues}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}`,
+    params,
+  );
+
+  return {
+    employee_id: employeeId,
+    ...payload,
+  };
+}
+
+export function setEmployeeId(employeeId: string): void {
+  process.env.CURRENT_EMPLOYEE_ID = employeeId;
+}
+
+export function getEmployeeId(): string | undefined {
+  return process.env.CURRENT_EMPLOYEE_ID || undefined;
+}
+
+export async function closeDb(): Promise<void> {
+  await pool.end();
+}
+
+async function bootstrapSchema(): Promise<void> {
+  try {
+    await connectDb();
+    await createDatabaseTables();
+    console.log('Neon database schema created successfully.');
+  } catch (error) {
+    console.error('Failed to create Neon database schema.', error);
+    process.exitCode = 1;
+  } finally {
+    await closeDb();
+  }
+}
+
+if (require.main === module && process.argv.includes('--init')) {
+  void bootstrapSchema();
+}

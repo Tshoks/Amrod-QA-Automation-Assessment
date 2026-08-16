@@ -12,7 +12,7 @@ export const CREATE_TABLES_SQL = `
     first_name VARCHAR(100) NOT NULL,
     middle_name VARCHAR(100),
     last_name VARCHAR(100) NOT NULL,
-    full_name VARCHAR(300) GENERATED ALWAYS AS (concat_ws(' ', first_name, middle_name, last_name)) STORED,
+    full_name VARCHAR(300),
     employee_code VARCHAR(50) UNIQUE,
     created_at TIMESTAMP DEFAULT NOW()
   );
@@ -62,6 +62,9 @@ export const CREATE_TABLES_SQL = `
     expected_error TEXT,
     description TEXT
   );
+
+  ALTER TABLE employees
+  ADD COLUMN IF NOT EXISTS full_name VARCHAR(300);
 `;
 
 interface LoginTestData {
@@ -145,6 +148,18 @@ const dbConfig = getDbConfig();
 
 let pool: Pool | null = null;
 
+export function buildEmployeeFullName(
+  firstName?: unknown,
+  middleName?: unknown,
+  lastName?: unknown,
+): string | null {
+  const parts = [firstName, middleName, lastName]
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter(Boolean);
+
+  return parts.length > 0 ? parts.join(" ") : null;
+}
+
 const getPool = (): Pool => {
   if (!pool) {
     pool = new Pool({
@@ -162,6 +177,24 @@ const getPool = (): Pool => {
 
 export async function createDatabaseTables(): Promise<void> {
   await getPool().query(CREATE_TABLES_SQL);
+  await getPool().query(
+    `UPDATE employees
+     SET full_name = NULLIF(
+       TRIM(
+         CONCAT(
+           first_name,
+           CASE
+             WHEN middle_name IS NOT NULL AND BTRIM(middle_name) <> '' THEN ' ' || middle_name
+             ELSE ''
+           END,
+           ' ',
+           last_name
+         )
+       ),
+       ''
+     )
+     WHERE full_name IS NULL`,
+  );
 }
 
 async function upsertPositiveTestData(
@@ -334,7 +367,18 @@ export async function readEmployeeData(
     [resolvedId],
   );
 
-  return result.rows[0] ?? null;
+  const row = result.rows[0];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    ...row,
+    full_name:
+      row.full_name ??
+      buildEmployeeFullName(row.first_name, row.middle_name, row.last_name),
+  };
 }
 
 const ALLOWED_EMPLOYEE_COLUMNS = new Set([
@@ -368,17 +412,24 @@ export async function writeEmployeeData(
   const updateSet = keys
     .map((key, index) => `"${key}" = $${index + 2}`)
     .join(", ");
+  const existingEmployee = await readEmployeeData(employeeId);
+  const fullName = buildEmployeeFullName(
+    payload.first_name ?? existingEmployee?.first_name,
+    payload.middle_name ?? existingEmployee?.middle_name,
+    payload.last_name ?? existingEmployee?.last_name,
+  );
 
-  const params = [employeeId, ...keys.map((key) => payload[key])];
+  const params = [employeeId, ...keys.map((key) => payload[key]), fullName];
 
   await getPool().query(
-    `INSERT INTO employees (employee_id, ${columns}) VALUES ($1, ${insertValues}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}`,
+    `INSERT INTO employees (employee_id, ${columns}, full_name) VALUES ($1, ${insertValues}, $${keys.length + 2}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}, full_name = $${keys.length + 2}`,
     params,
   );
 
   return {
     employee_id: employeeId,
     ...payload,
+    full_name: fullName,
   };
 }
 

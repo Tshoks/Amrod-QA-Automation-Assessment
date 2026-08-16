@@ -8,7 +8,7 @@
     "test:sanity": "playwright test --grep @sanity",
     "test:regression": "playwright test --grep @regression",
     "db:create-schema": "ts-node db.ts --init",
-    "report:allure": "allure generate ./allure-results --clean -o ./allure-report",
+    "report:allure": "allure generate ./allure-results --output ./allure-report",
     "report:allure:open": "allure serve ./allure-results",
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit",

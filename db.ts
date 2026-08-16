@@ -62,9 +62,6 @@ export const CREATE_TABLES_SQL = `
     expected_error TEXT,
     description TEXT
   );
-
-  ALTER TABLE employees
-  ADD COLUMN IF NOT EXISTS full_name VARCHAR(300);
 `;
 
 interface LoginTestData {

@@ -1,5 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { expect, Page, test } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class ValidationPage extends BasePage {
   constructor(page: Page) {
@@ -40,7 +40,9 @@ export class ValidationPage extends BasePage {
       `Validate toast message '${expected}'`,
       async () => {
         await this.assertVisible(locator);
-        await expect(this.page.getByText(expected, { exact: true })).toBeVisible();
+        await expect(
+          this.page.getByText(expected, { exact: true }),
+        ).toBeVisible();
       },
       `Failed to validate toast message '${expected}'.`,
     );
@@ -53,7 +55,9 @@ export class ValidationPage extends BasePage {
       `Validate page header '${expected}'`,
       async () => {
         await this.assertVisible(locator);
-        await expect(this.page.getByRole('heading', { name: expected })).toBeVisible();
+        await expect(
+          this.page.getByRole("heading", { name: expected }),
+        ).toBeVisible();
       },
       `Failed to validate page header '${expected}'.`,
     );

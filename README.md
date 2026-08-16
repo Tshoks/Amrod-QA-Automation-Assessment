@@ -1,9 +1,11 @@
 # OrangeHRM Playwright Automation Framework
 
 ## Overview
+
 This repository contains a scalable, modular end‑to‑end automation framework for OrangeHRM, built using **Playwright**, **TypeScript**, and **PostgreSQL**.
 
 The framework supports:
+
 - Page Object Model (POM) architecture
 - Cross‑browser execution (Chromium, Firefox, WebKit)
 - Parallel test execution
@@ -16,6 +18,7 @@ The framework supports:
 This foundation enables reliable **smoke**, **sanity**, and **regression** testing across the application.
 
 ## Tech Stack
+
 - **Playwright** (E2E automation)
 - **TypeScript**
 - **Node.js 20+**
@@ -24,7 +27,9 @@ This foundation enables reliable **smoke**, **sanity**, and **regression** testi
 - **GitHub Actions CI**
 
 ## Prerequisites
+
 Ensure the following are installed:
+
 - Node.js 20+
 - npm
 - PostgreSQL database instance
@@ -39,7 +44,9 @@ Ensure the following are installed:
    cd <repo-folder>
    npm ci
    ```
+
 ## Running tests
+
 - Run all tests:
   npx playwright test
 - Run smoke tests:
@@ -58,7 +65,9 @@ Ensure the following are installed:
   npx allure serve ./allure-results
 
 ## Database configuration
+
 The project includes a PostgreSQL integration helper in db.ts. Configure the database using environment variables:
+
 - DATABASE_URL
 - DB_HOST
 - DB_PORT
@@ -70,9 +79,11 @@ The project includes a PostgreSQL integration helper in db.ts. Configure the dat
 The helper supports reading and writing employee data and can persist the active employee ID for workflow continuity in end-to-end automation flows.
 
 ## CI Pipeline (GitHub Actions)
+
 The workflow in .github/workflows/ci.yml runs automatically on pull requests targeting master.
 
 It performs:
+
 - TypeScript compile check (build)
 - ESLint code quality check (lint)
 - Prettier formatting check (format-checks)
@@ -82,37 +93,43 @@ It performs:
 - Branch protection rules enforce all checks before merging.
 
 ## Project structure
+
 src/
-  pages/          # Page Object Model classes
-  elements/       # Element locator definitions
-  tests/          # Test suites (smoke, sanity, regression)
-  utils/          # Helpers (DB, env, logger)
-  helpers/        # Screenshot, Allure helpers
+pages/ # Page Object Model classes
+elements/ # Element locator definitions
+tests/ # Test suites (smoke, sanity, regression)
+utils/ # Helpers (DB, env, logger)
+helpers/ # Screenshot, Allure helpers
 playwright.config.ts
 db.ts
 .env.example
 .github/workflows/ci.yml
 
 ## Error Handling Architecture
+
 The framework implements structured error handling across three layers:
 
 1. Script Error Handling
+
 - Locator failures
 - Timeout errors
 - Unexpected crashes
 - Screenshot + Allure logging
 
 2. Functional Validation Handling
+
 - Assertions for expected UI behavior
 - Toast message validation
 - Page header validation
 
 3. Negative Scenario Validation Handling
+
 - Expected validation messages
 - Required field errors
 - Invalid input handling
 
 ## Features Summary
+
 - Modular POM structure
 - Reusable element locators
 - Centralized DB integration
@@ -125,46 +142,47 @@ The framework implements structured error handling across three layers:
 # Framework Architecture Diagram (ASCII)
 
 ## Framework Architecture Diagram
+
 Below is a high-level representation of the automation framework structure.
 
 +----------------------------------------------------------------------------------+
-|                         OrangeHRM QA Automation Framework                        |
+| OrangeHRM QA Automation Framework |
 +----------------------------------------------------------------------------------+
-|                                  Configuration                                   |
-|                      Playwright + TypeScript + Environment                       |
+| Configuration |
+| Playwright + TypeScript + Environment |
 +-------------------------------------------+--------------------------------------+
-                                            |
-                                            v
-+------------------------+      +------------------------+      +------------------------+
-|      Tests Layer       | ---> |      Pages Layer       | ---> |    Elements Layer      |
-| Smoke / Sanity / Reg   |      | Reusable page actions  |      | Centralized locators   |
-+-----------+------------+      +-----------+------------+      +-----------+------------+
-            |                               |                               |
-            +-------------------------------+-------------------------------+
-                                            |
-                                            v
-+------------------------+      +------------------------+      +------------------------+
-|     Helpers Layer      | ---> |      Utils Layer       | ---> |    DB Integration      |
-| Screenshots / Allure   |      | Logger / Env / Common  |      | PostgreSQL test data   |
-| Error categorization   |      | helper functions       |      | setup + validation     |
-+-----------+------------+      +-----------+------------+      +-----------+------------+
-            |                               |                               |
-            +-------------------------------+-------------------------------+
-                                            |
-                                            v
+|
+v
++------------------------+ +------------------------+ +------------------------+
+| Tests Layer | ---> | Pages Layer | ---> | Elements Layer |
+| Smoke / Sanity / Reg | | Reusable page actions | | Centralized locators |
++-----------+------------+ +-----------+------------+ +-----------+------------+
+| | |
++-------------------------------+-------------------------------+
+|
+v
++------------------------+ +------------------------+ +------------------------+
+| Helpers Layer | ---> | Utils Layer | ---> | DB Integration |
+| Screenshots / Allure | | Logger / Env / Common | | PostgreSQL test data |
+| Error categorization | | helper functions | | setup + validation |
++-----------+------------+ +-----------+------------+ +-----------+------------+
+| | |
++-------------------------------+-------------------------------+
+|
+v
 +----------------------------------------------------------------------------------+
-|                            Execution & Quality Gates                             |
-| Parallel workers | Cross-browser matrix | Functional/Negative checks             |
+| Execution & Quality Gates |
+| Parallel workers | Cross-browser matrix | Functional/Negative checks |
 +----------------------------------------------------------------------------------+
-                                            |
-                                            v
+|
+v
 +----------------------------------------------------------------------------------+
-|                                   Reporting                                      |
-|                 Allure results, screenshots, artifacts, failure logs             |
+| Reporting |
+| Allure results, screenshots, artifacts, failure logs |
 +----------------------------------------------------------------------------------+
-                                            |
-                                            v
+|
+v
 +----------------------------------------------------------------------------------+
-|                                  CI/CD Pipeline                                  |
-|            Build | Lint | Format Check | Playwright Run | Allure Artifact        |
+| CI/CD Pipeline |
+| Build | Lint | Format Check | Playwright Run | Allure Artifact |
 +----------------------------------------------------------------------------------+

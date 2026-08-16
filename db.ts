@@ -1,9 +1,10 @@
-import { Pool, QueryResultRow } from 'pg';
-import dotenv from 'dotenv';
+import { Pool, QueryResultRow } from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-const DEFAULT_NEON_CONNECTION_STRING = process.env.DEFAULT_NEON_CONNECTION_STRING;
+const DEFAULT_NEON_CONNECTION_STRING =
+  process.env.DEFAULT_NEON_CONNECTION_STRING;
 export const CREATE_TABLES_SQL = `
   CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
@@ -88,10 +89,10 @@ interface DbConfig {
 
 const describeDbTarget = (config: DbConfig): string => {
   if (config.connectionString) {
-    return 'the configured connection string';
+    return "the configured connection string";
   }
 
-  const host = config.host ?? 'localhost';
+  const host = config.host ?? "localhost";
   const port = config.port ?? 5432;
 
   return `${host}:${port}`;
@@ -100,7 +101,11 @@ const describeDbTarget = (config: DbConfig): string => {
 const formatDbConnectionError = (error: unknown): Error => {
   const target = describeDbTarget(dbConfig);
 
-  if (error instanceof Error && 'code' in error && (error as { code?: string }).code === 'ECONNREFUSED') {
+  if (
+    error instanceof Error &&
+    "code" in error &&
+    (error as { code?: string }).code === "ECONNREFUSED"
+  ) {
     return new Error(
       `Unable to connect to PostgreSQL at ${target}. Start a local PostgreSQL instance on port 5432 or set DATABASE_URL / NEON_CONNECTION_STRING to a reachable database before running db:create-schema or Playwright tests.`,
       { cause: error },
@@ -108,7 +113,9 @@ const formatDbConnectionError = (error: unknown): Error => {
   }
 
   return error instanceof Error
-    ? new Error(`Unable to connect to PostgreSQL at ${target}.`, { cause: error })
+    ? new Error(`Unable to connect to PostgreSQL at ${target}.`, {
+        cause: error,
+      })
     : new Error(`Unable to connect to PostgreSQL at ${target}.`);
 };
 
@@ -126,11 +133,11 @@ const getDbConfig = (): DbConfig => {
   }
 
   return {
-    host: process.env.DB_HOST ?? 'localhost',
+    host: process.env.DB_HOST ?? "localhost",
     port: Number(process.env.DB_PORT ?? 5432),
-    database: process.env.DB_NAME ?? 'orangehrm',
-    user: process.env.DB_USER ?? 'postgres',
-    password: process.env.DB_PASSWORD ?? 'postgres',
+    database: process.env.DB_NAME ?? "orangehrm",
+    user: process.env.DB_USER ?? "postgres",
+    password: process.env.DB_PASSWORD ?? "postgres",
   };
 };
 
@@ -143,7 +150,8 @@ const getPool = (): Pool => {
     pool = new Pool({
       ...dbConfig,
       ssl:
-        dbConfig.connectionString?.includes('sslmode=require') || process.env.PGSSLMODE === 'require'
+        dbConfig.connectionString?.includes("sslmode=require") ||
+        process.env.PGSSLMODE === "require"
           ? { rejectUnauthorized: false }
           : undefined,
     });
@@ -187,40 +195,48 @@ export async function ensureDefaultLoginTestData(): Promise<void> {
   await createDatabaseTables();
 
   await upsertPositiveTestData(
-    'login.url',
-    process.env.BASE_URL ?? 'https://opensource-demo.orangehrmlive.com',
-    'OrangeHRM login page URL',
+    "login.url",
+    process.env.BASE_URL ?? "https://opensource-demo.orangehrmlive.com",
+    "OrangeHRM login page URL",
   );
-  await upsertPositiveTestData('login.username', 'Admin', 'Valid OrangeHRM username');
-  await upsertPositiveTestData('login.password', 'admin123', 'Valid OrangeHRM password');
+  await upsertPositiveTestData(
+    "login.username",
+    "Admin",
+    "Valid OrangeHRM username",
+  );
+  await upsertPositiveTestData(
+    "login.password",
+    "admin123",
+    "Valid OrangeHRM password",
+  );
 }
 
 export async function ensureDefaultLoginNegativeTestData(): Promise<void> {
   await createDatabaseTables();
 
   await upsertNegativeTestData(
-    'login.invalid.username',
-    'InvalidAdmin',
-    'Invalid credentials',
-    'Invalid OrangeHRM username for negative login test',
+    "login.invalid.username",
+    "InvalidAdmin",
+    "Invalid credentials",
+    "Invalid OrangeHRM username for negative login test",
   );
   await upsertNegativeTestData(
-    'login.invalid.password',
-    'InvalidPassword123',
-    'Invalid credentials',
-    'Invalid OrangeHRM password for negative login test',
+    "login.invalid.password",
+    "InvalidPassword123",
+    "Invalid credentials",
+    "Invalid OrangeHRM password for negative login test",
   );
   await upsertNegativeTestData(
-    'login.invalid.credentials.message',
-    'Invalid credentials',
-    'Invalid credentials',
-    'Expected login error message for invalid credentials',
+    "login.invalid.credentials.message",
+    "Invalid credentials",
+    "Invalid credentials",
+    "Expected login error message for invalid credentials",
   );
   await upsertNegativeTestData(
-    'login.required.message',
-    'Required',
-    'Required',
-    'Expected validation error message for required username and password fields',
+    "login.required.message",
+    "Required",
+    "Required",
+    "Expected validation error message for required username and password fields",
   );
 }
 
@@ -228,7 +244,7 @@ export async function getPositiveTestDataValue(key: string): Promise<string> {
   await createDatabaseTables();
 
   const result = await getPool().query<QueryResultRow>(
-    'SELECT value FROM test_data_positive WHERE key = $1',
+    "SELECT value FROM test_data_positive WHERE key = $1",
     [key],
   );
 
@@ -245,7 +261,7 @@ export async function getNegativeTestDataValue(key: string): Promise<string> {
   await createDatabaseTables();
 
   const result = await getPool().query<QueryResultRow>(
-    'SELECT value FROM test_data_negative WHERE key = $1',
+    "SELECT value FROM test_data_negative WHERE key = $1",
     [key],
   );
 
@@ -262,9 +278,9 @@ export async function getLoginTestData(): Promise<LoginTestData> {
   await ensureDefaultLoginTestData();
 
   const [url, username, password] = await Promise.all([
-    getPositiveTestDataValue('login.url'),
-    getPositiveTestDataValue('login.username'),
-    getPositiveTestDataValue('login.password'),
+    getPositiveTestDataValue("login.url"),
+    getPositiveTestDataValue("login.username"),
+    getPositiveTestDataValue("login.password"),
   ]);
 
   return { url, username, password };
@@ -273,14 +289,19 @@ export async function getLoginTestData(): Promise<LoginTestData> {
 export async function getLoginNegativeTestData(): Promise<LoginNegativeTestData> {
   await ensureDefaultLoginNegativeTestData();
 
-  const [url, invalidUsername, invalidPassword, invalidCredentialsMessage, requiredFieldMessage] =
-    await Promise.all([
-      getPositiveTestDataValue('login.url'),
-      getNegativeTestDataValue('login.invalid.username'),
-      getNegativeTestDataValue('login.invalid.password'),
-      getNegativeTestDataValue('login.invalid.credentials.message'),
-      getNegativeTestDataValue('login.required.message'),
-    ]);
+  const [
+    url,
+    invalidUsername,
+    invalidPassword,
+    invalidCredentialsMessage,
+    requiredFieldMessage,
+  ] = await Promise.all([
+    getPositiveTestDataValue("login.url"),
+    getNegativeTestDataValue("login.invalid.username"),
+    getNegativeTestDataValue("login.invalid.password"),
+    getNegativeTestDataValue("login.invalid.credentials.message"),
+    getNegativeTestDataValue("login.required.message"),
+  ]);
 
   return {
     url,
@@ -293,13 +314,15 @@ export async function getLoginNegativeTestData(): Promise<LoginNegativeTestData>
 
 export async function connectDb(): Promise<void> {
   try {
-    await getPool().query('SELECT 1');
+    await getPool().query("SELECT 1");
   } catch (error) {
     throw formatDbConnectionError(error);
   }
 }
 
-export async function readEmployeeData(employeeId?: string): Promise<Record<string, unknown> | null> {
+export async function readEmployeeData(
+  employeeId?: string,
+): Promise<Record<string, unknown> | null> {
   const resolvedId = employeeId ?? process.env.CURRENT_EMPLOYEE_ID ?? null;
 
   if (!resolvedId) {
@@ -307,7 +330,7 @@ export async function readEmployeeData(employeeId?: string): Promise<Record<stri
   }
 
   const result = await getPool().query<QueryResultRow>(
-    'SELECT * FROM employees WHERE employee_id = $1',
+    "SELECT * FROM employees WHERE employee_id = $1",
     [resolvedId],
   );
 
@@ -315,10 +338,10 @@ export async function readEmployeeData(employeeId?: string): Promise<Record<stri
 }
 
 const ALLOWED_EMPLOYEE_COLUMNS = new Set([
-  'first_name',
-  'middle_name',
-  'last_name',
-  'employee_code',
+  "first_name",
+  "middle_name",
+  "last_name",
+  "employee_code",
 ]);
 
 export async function writeEmployeeData(
@@ -326,7 +349,7 @@ export async function writeEmployeeData(
   payload: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
   if (!employeeId) {
-    throw new Error('Employee ID is required to write employee data.');
+    throw new Error("Employee ID is required to write employee data.");
   }
 
   const keys = Object.keys(payload);
@@ -337,14 +360,14 @@ export async function writeEmployeeData(
 
   const invalidKeys = keys.filter((key) => !ALLOWED_EMPLOYEE_COLUMNS.has(key));
   if (invalidKeys.length > 0) {
-    throw new Error(`Invalid employee column(s): ${invalidKeys.join(', ')}`);
+    throw new Error(`Invalid employee column(s): ${invalidKeys.join(", ")}`);
   }
 
-  const columns = keys.map((key) => `"${key}"`).join(', ');
-  const insertValues = keys.map((_, index) => `$${index + 2}`).join(', ');
+  const columns = keys.map((key) => `"${key}"`).join(", ");
+  const insertValues = keys.map((_, index) => `$${index + 2}`).join(", ");
   const updateSet = keys
     .map((key, index) => `"${key}" = $${index + 2}`)
-    .join(', ');
+    .join(", ");
 
   const params = [employeeId, ...keys.map((key) => payload[key])];
 
@@ -381,16 +404,17 @@ async function bootstrapSchema(): Promise<void> {
   try {
     await connectDb();
     await createDatabaseTables();
-    console.log('Database schema created successfully.');
+    console.log("Database schema created successfully.");
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown database error.';
-    console.error('Failed to create database schema.', message);
+    const message =
+      error instanceof Error ? error.message : "Unknown database error.";
+    console.error("Failed to create database schema.", message);
     process.exitCode = 1;
   } finally {
     await closeDb();
   }
 }
 
-if (require.main === module && process.argv.includes('--init')) {
+if (require.main === module && process.argv.includes("--init")) {
   void bootstrapSchema();
 }

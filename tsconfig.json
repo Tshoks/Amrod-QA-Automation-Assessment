@@ -14,14 +14,6 @@
     "baseUrl": ".",
     "outDir": "dist"
   },
-  "include": [
-    "**/*.ts",
-    "playwright.config.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "allure-report",
-    "allure-results"
-  ]
+  "include": ["**/*.ts", "playwright.config.ts"],
+  "exclude": ["node_modules", "dist", "allure-report", "allure-results"]
 }

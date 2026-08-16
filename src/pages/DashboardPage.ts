@@ -1,8 +1,9 @@
-import { expect, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { expect, Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class DashboardPage extends BasePage {
-  private readonly dashboardHeader: string = '//h6[normalize-space()="Dashboard"]';
+  private readonly dashboardHeader: string =
+    '//h6[normalize-space()="Dashboard"]';
 
   constructor(page: Page) {
     super(page);

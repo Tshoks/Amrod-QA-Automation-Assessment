@@ -1,7 +1,7 @@
-import { expect, Page } from '@playwright/test';
-import { LoginElements } from '../elements/LoginElements';
-import { BasePage } from './BasePage';
-import { DashboardPage } from './DashboardPage';
+import { expect, Page } from "@playwright/test";
+import { LoginElements } from "../elements/LoginElements";
+import { BasePage } from "./BasePage";
+import { DashboardPage } from "./DashboardPage";
 
 export class LoginPage extends BasePage {
   private readonly loginElements: LoginElements;
@@ -12,8 +12,13 @@ export class LoginPage extends BasePage {
   }
 
   async navigateToLogin(url: string): Promise<this> {
-    await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await this.page.locator(this.loginElements.getUsernameInput()).waitFor({ state: 'visible' });
+    await this.page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
+    });
+    await this.page
+      .locator(this.loginElements.getUsernameInput())
+      .waitFor({ state: "visible" });
     return this;
   }
 
@@ -31,7 +36,6 @@ export class LoginPage extends BasePage {
     await this.click(this.loginElements.getLoginButton());
     return this;
   }
-  
 
   async validateInvalidCredentials(message: string): Promise<this> {
     await this.assertVisible(`text=${message}`);
@@ -43,7 +47,10 @@ export class LoginPage extends BasePage {
     return this;
   }
 
-  async completeLogin(username: string, password: string): Promise<DashboardPage> {
+  async completeLogin(
+    username: string,
+    password: string,
+  ): Promise<DashboardPage> {
     await this.enterUsername(username);
     await this.enterPassword(password);
     await this.clickLoginButton();

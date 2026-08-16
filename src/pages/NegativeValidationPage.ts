@@ -1,5 +1,5 @@
-import { expect, Page, test } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { expect, Page, test } from "@playwright/test";
+import { BasePage } from "./BasePage";
 
 export class NegativeValidationPage extends BasePage {
   constructor(page: Page) {

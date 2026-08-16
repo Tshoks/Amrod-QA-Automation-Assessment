@@ -63,6 +63,24 @@ export const CREATE_TABLES_SQL = `
     description TEXT
   );
 `;
+export const SCHEMA_BOOTSTRAP_LOCK_ID = 3_481_215_407;
+export const SCHEMA_BOOTSTRAP_LOCK_SQL = "SELECT pg_advisory_xact_lock($1)";
+const BACKFILL_EMPLOYEE_FULL_NAMES_SQL = `UPDATE employees
+     SET full_name = NULLIF(
+       TRIM(
+         CONCAT(
+           first_name,
+           CASE
+             WHEN middle_name IS NOT NULL AND BTRIM(middle_name) <> '' THEN ' ' || middle_name
+             ELSE ''
+           END,
+           ' ',
+           last_name
+         )
+       ),
+       ''
+     )
+     WHERE full_name IS NULL`;
 
 interface LoginTestData {
   url: string;
@@ -144,6 +162,7 @@ const getDbConfig = (): DbConfig => {
 const dbConfig = getDbConfig();
 
 let pool: Pool | null = null;
+let schemaBootstrapPromise: Promise<void> | null = null;
 
 export function buildEmployeeFullName(
   firstName?: unknown,
@@ -172,26 +191,36 @@ const getPool = (): Pool => {
   return pool;
 };
 
+async function runSchemaBootstrap(): Promise<void> {
+  const client = await getPool().connect();
+
+  try {
+    await client.query("BEGIN");
+    await client.query(SCHEMA_BOOTSTRAP_LOCK_SQL, [SCHEMA_BOOTSTRAP_LOCK_ID]);
+    await client.query(CREATE_TABLES_SQL);
+    await client.query(BACKFILL_EMPLOYEE_FULL_NAMES_SQL);
+    await client.query("COMMIT");
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {
+      // Ignore rollback errors and preserve the original failure.
+    }
+
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 export async function createDatabaseTables(): Promise<void> {
-  await getPool().query(CREATE_TABLES_SQL);
-  await getPool().query(
-    `UPDATE employees
-     SET full_name = NULLIF(
-       TRIM(
-         CONCAT(
-           first_name,
-           CASE
-             WHEN middle_name IS NOT NULL AND BTRIM(middle_name) <> '' THEN ' ' || middle_name
-             ELSE ''
-           END,
-           ' ',
-           last_name
-         )
-       ),
-       ''
-     )
-     WHERE full_name IS NULL`,
-  );
+  if (!schemaBootstrapPromise) {
+    schemaBootstrapPromise = runSchemaBootstrap().finally(() => {
+      schemaBootstrapPromise = null;
+    });
+  }
+
+  await schemaBootstrapPromise;
 }
 
 async function upsertPositiveTestData(

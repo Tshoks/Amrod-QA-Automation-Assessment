@@ -86,6 +86,32 @@ interface DbConfig {
   password?: string;
 }
 
+const describeDbTarget = (config: DbConfig): string => {
+  if (config.connectionString) {
+    return 'the configured connection string';
+  }
+
+  const host = config.host ?? 'localhost';
+  const port = config.port ?? 5432;
+
+  return `${host}:${port}`;
+};
+
+const formatDbConnectionError = (error: unknown): Error => {
+  const target = describeDbTarget(dbConfig);
+
+  if (error instanceof Error && 'code' in error && (error as { code?: string }).code === 'ECONNREFUSED') {
+    return new Error(
+      `Unable to connect to PostgreSQL at ${target}. Start a local PostgreSQL instance on port 5432 or set DATABASE_URL / NEON_CONNECTION_STRING to a reachable database before running db:create-schema or Playwright tests.`,
+      { cause: error },
+    );
+  }
+
+  return error instanceof Error
+    ? new Error(`Unable to connect to PostgreSQL at ${target}.`, { cause: error })
+    : new Error(`Unable to connect to PostgreSQL at ${target}.`);
+};
+
 const getDbConfig = (): DbConfig => {
   if (process.env.DATABASE_URL) {
     return { connectionString: process.env.DATABASE_URL };
@@ -110,16 +136,24 @@ const getDbConfig = (): DbConfig => {
 
 const dbConfig = getDbConfig();
 
-const pool = new Pool({
-  ...dbConfig,
-  ssl:
-    dbConfig.connectionString?.includes('sslmode=require') || process.env.PGSSLMODE === 'require'
-      ? { rejectUnauthorized: false }
-      : undefined,
-});
+let pool: Pool | null = null;
+
+const getPool = (): Pool => {
+  if (!pool) {
+    pool = new Pool({
+      ...dbConfig,
+      ssl:
+        dbConfig.connectionString?.includes('sslmode=require') || process.env.PGSSLMODE === 'require'
+          ? { rejectUnauthorized: false }
+          : undefined,
+    });
+  }
+
+  return pool;
+};
 
 export async function createDatabaseTables(): Promise<void> {
-  await pool.query(CREATE_TABLES_SQL);
+  await getPool().query(CREATE_TABLES_SQL);
 }
 
 async function upsertPositiveTestData(
@@ -127,7 +161,7 @@ async function upsertPositiveTestData(
   value: string,
   description: string,
 ): Promise<void> {
-  await pool.query(
+  await getPool().query(
     `INSERT INTO test_data_positive (key, value, description)
      VALUES ($1, $2, $3)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, description = EXCLUDED.description`,
@@ -141,7 +175,7 @@ async function upsertNegativeTestData(
   expectedError: string,
   description: string,
 ): Promise<void> {
-  await pool.query(
+  await getPool().query(
     `INSERT INTO test_data_negative (key, value, expected_error, description)
      VALUES ($1, $2, $3, $4)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, expected_error = EXCLUDED.expected_error, description = EXCLUDED.description`,
@@ -193,7 +227,7 @@ export async function ensureDefaultLoginNegativeTestData(): Promise<void> {
 export async function getPositiveTestDataValue(key: string): Promise<string> {
   await createDatabaseTables();
 
-  const result = await pool.query<QueryResultRow>(
+  const result = await getPool().query<QueryResultRow>(
     'SELECT value FROM test_data_positive WHERE key = $1',
     [key],
   );
@@ -210,7 +244,7 @@ export async function getPositiveTestDataValue(key: string): Promise<string> {
 export async function getNegativeTestDataValue(key: string): Promise<string> {
   await createDatabaseTables();
 
-  const result = await pool.query<QueryResultRow>(
+  const result = await getPool().query<QueryResultRow>(
     'SELECT value FROM test_data_negative WHERE key = $1',
     [key],
   );
@@ -258,7 +292,11 @@ export async function getLoginNegativeTestData(): Promise<LoginNegativeTestData>
 }
 
 export async function connectDb(): Promise<void> {
-  await pool.query('SELECT 1');
+  try {
+    await getPool().query('SELECT 1');
+  } catch (error) {
+    throw formatDbConnectionError(error);
+  }
 }
 
 export async function readEmployeeData(employeeId?: string): Promise<Record<string, unknown> | null> {
@@ -268,7 +306,7 @@ export async function readEmployeeData(employeeId?: string): Promise<Record<stri
     return null;
   }
 
-  const result = await pool.query<QueryResultRow>(
+  const result = await getPool().query<QueryResultRow>(
     'SELECT * FROM employees WHERE employee_id = $1',
     [resolvedId],
   );
@@ -310,7 +348,7 @@ export async function writeEmployeeData(
 
   const params = [employeeId, ...keys.map((key) => payload[key])];
 
-  await pool.query(
+  await getPool().query(
     `INSERT INTO employees (employee_id, ${columns}) VALUES ($1, ${insertValues}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}`,
     params,
   );
@@ -330,16 +368,23 @@ export function getEmployeeId(): string | undefined {
 }
 
 export async function closeDb(): Promise<void> {
-  await pool.end();
+  if (!pool) {
+    return;
+  }
+
+  const activePool = pool;
+  pool = null;
+  await activePool.end();
 }
 
 async function bootstrapSchema(): Promise<void> {
   try {
     await connectDb();
     await createDatabaseTables();
-    console.log('Neon database schema created successfully.');
+    console.log('Database schema created successfully.');
   } catch (error) {
-    console.error('Failed to create Neon database schema.', error);
+    const message = error instanceof Error ? error.message : 'Unknown database error.';
+    console.error('Failed to create database schema.', message);
     process.exitCode = 1;
   } finally {
     await closeDb();

@@ -31,11 +31,13 @@ export class LoginTest extends BaseTest {
         await loginPage.navigateToLogin(loginData.url);
       });
 
-      await this.step(page, testInfo, 'Step 2: Complete login with valid credentials', async () => {
-        await loginPage.completeLogin(loginData.username, loginData.password);
+      await this.step(page, testInfo, 'Step 2: Enter valid username and password', async () => {
+        await loginPage.enterUsername(loginData.username);
+        await loginPage.enterPassword(loginData.password);
       });
 
-      await this.step(page, testInfo, 'Step 3: Validate successful login', async () => {
+      await this.step(page, testInfo, 'Step 3: Submit login and validate successful login', async () => {
+        await loginPage.clickLoginButton();
         await dashboardPage.validateSuccessfulLogin();
       });
     });
@@ -49,11 +51,13 @@ export class LoginTest extends BaseTest {
         await loginPage.navigateToLogin(loginNegativeData.url);
       });
 
-      await this.step(page, testInfo, 'Step 2: Attempt login with invalid credentials', async () => {
-        await loginPage.completeLogin(loginNegativeData.invalidUsername, loginNegativeData.invalidPassword);
+      await this.step(page, testInfo, 'Step 2: Enter invalid username and password', async () => {
+        await loginPage.enterUsername(loginNegativeData.invalidUsername);
+        await loginPage.enterPassword(loginNegativeData.invalidPassword);
       });
 
-      await this.step(page, testInfo, 'Step 3: Validate invalid credentials error', async () => {
+      await this.step(page, testInfo, 'Step 3: Submit login and validate invalid credentials error', async () => {
+        await loginPage.clickLoginButton();
         await loginPage.validateInvalidCredentials(loginNegativeData.invalidCredentialsMessage);
       });
     });

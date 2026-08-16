@@ -10,11 +10,7 @@ export class BasePage {
   private sanitizeScreenshotName(name: string): string {
     return name.replace(/[^a-z0-9-_]+/gi, '_').replace(/^_+|_+$/g, '') || 'screenshot';
   }
-
-  private isPasswordLocator(locator: string): boolean {
-    return /password/i.test(locator);
-  }
-
+  
   private async captureFailureScreenshot(name: string): Promise<void> {
     if (this.page.isClosed()) return;
 

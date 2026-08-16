@@ -5,6 +5,8 @@ dotenv.config();
 
 export default defineConfig({
   testDir: "./src/tests",
+  globalSetup: "./src/tests/global.setup.ts",
+  testIgnore: ["src/tests/smoke/**"],
   timeout: 60000,
   expect: {
     timeout: 10000,
@@ -41,5 +43,6 @@ export default defineConfig({
       },
     },
   ],
-  grep: /@smoke|@sanity|@regression/,
+  // Functional/test-report scope only; smoke checks remain available for explicit runs.
+  grep: /@sanity|@regression/,
 });

@@ -32,7 +32,7 @@ Ensure the following are installed:
 
 - Node.js 20+
 - npm
-- PostgreSQL database instance
+- Cloud PostgreSQL database instance (for example Neon)
 - Allure commandline
 - GitHub Actions enabled for CI
 
@@ -66,21 +66,24 @@ Ensure the following are installed:
 
 ## Database configuration
 
-The project includes a PostgreSQL integration helper in db.ts. Configure the database using environment variables:
+The project includes a PostgreSQL integration helper in db.ts. Configure the database using a cloud connection string:
 
-- DATABASE_URL
-- DB_HOST
-- DB_PORT
-- DB_NAME
-- DB_USER
-- DB_PASSWORD
+- DATABASE_URL (preferred)
+- NEON_CONNECTION_STRING (optional fallback)
+- DEFAULT_NEON_CONNECTION_STRING (optional fallback)
 - CURRENT_EMPLOYEE_ID
+
+Example:
+
+`DATABASE_URL=postgresql://<user>:<password>@<host>/<database>?sslmode=require`
 
 The helper supports reading and writing employee data and can persist the active employee ID for workflow continuity in end-to-end automation flows.
 
 ## CI Pipeline (GitHub Actions)
 
 The workflow in .github/workflows/ci.yml runs automatically on pull requests targeting master.
+
+For Playwright tests in CI, set repository secret `DATABASE_URL` to your cloud PostgreSQL connection string.
 
 It performs:
 

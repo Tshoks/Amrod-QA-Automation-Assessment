@@ -1,4 +1,4 @@
-import { Pool, QueryResultRow } from "pg";
+import { Pool, PoolClient, QueryResultRow } from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -81,6 +81,12 @@ const BACKFILL_EMPLOYEE_FULL_NAMES_SQL = `UPDATE employees
        ''
      )
      WHERE full_name IS NULL`;
+const FULL_NAME_GENERATION_METADATA_SQL = `SELECT is_generated
+     FROM information_schema.columns
+     WHERE table_schema = current_schema()
+       AND table_name = 'employees'
+       AND column_name = 'full_name'
+     LIMIT 1`;
 
 interface LoginTestData {
   url: string;
@@ -125,7 +131,7 @@ const formatDbConnectionError = (error: unknown): Error => {
     (error as { code?: string }).code === "ECONNREFUSED"
   ) {
     return new Error(
-      `Unable to connect to PostgreSQL at ${target}. Start a local PostgreSQL instance on port 5432 or set DATABASE_URL / NEON_CONNECTION_STRING to a reachable database before running db:create-schema or Playwright tests.`,
+      `Unable to connect to PostgreSQL at ${target}. Set DATABASE_URL (or NEON_CONNECTION_STRING / DEFAULT_NEON_CONNECTION_STRING) to a reachable cloud PostgreSQL instance before running db:create-schema or Playwright tests.`,
       { cause: error },
     );
   }
@@ -138,25 +144,51 @@ const formatDbConnectionError = (error: unknown): Error => {
 };
 
 const getDbConfig = (): DbConfig => {
+  const validateCloudConnection = (
+    connectionString: string,
+    sourceName: string,
+  ): DbConfig => {
+    try {
+      const parsed = new URL(connectionString);
+      const host = parsed.hostname.toLowerCase();
+
+      if (host === "localhost" || host === "127.0.0.1" || host === "::1") {
+        throw new Error(
+          `${sourceName} points to localhost, but this project is configured for cloud PostgreSQL only. Set DATABASE_URL to your cloud PostgreSQL host.`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error(`Invalid ${sourceName} value.`);
+    }
+
+    return { connectionString };
+  };
+
   if (process.env.DATABASE_URL) {
-    return { connectionString: process.env.DATABASE_URL };
+    return validateCloudConnection(process.env.DATABASE_URL, "DATABASE_URL");
   }
 
   if (process.env.NEON_CONNECTION_STRING) {
-    return { connectionString: process.env.NEON_CONNECTION_STRING };
+    return validateCloudConnection(
+      process.env.NEON_CONNECTION_STRING,
+      "NEON_CONNECTION_STRING",
+    );
   }
 
   if (DEFAULT_NEON_CONNECTION_STRING) {
-    return { connectionString: DEFAULT_NEON_CONNECTION_STRING };
+    return validateCloudConnection(
+      DEFAULT_NEON_CONNECTION_STRING,
+      "DEFAULT_NEON_CONNECTION_STRING",
+    );
   }
 
-  return {
-    host: process.env.DB_HOST ?? "localhost",
-    port: Number(process.env.DB_PORT ?? 5432),
-    database: process.env.DB_NAME ?? "orangehrm",
-    user: process.env.DB_USER ?? "postgres",
-    password: process.env.DB_PASSWORD ?? "postgres",
-  };
+  throw new Error(
+    "Missing cloud database connection string. Set DATABASE_URL (preferred) or NEON_CONNECTION_STRING / DEFAULT_NEON_CONNECTION_STRING.",
+  );
 };
 
 const dbConfig = getDbConfig();
@@ -192,6 +224,15 @@ const getPool = (): Pool => {
   return pool;
 };
 
+async function isFullNameGeneratedColumn(client: PoolClient): Promise<boolean> {
+  const result = await client.query<{ is_generated?: string }>(
+    FULL_NAME_GENERATION_METADATA_SQL,
+  );
+  const isGenerated = result.rows[0]?.is_generated ?? "NEVER";
+
+  return isGenerated !== "NEVER";
+}
+
 async function runSchemaBootstrap(): Promise<void> {
   const client = await getPool().connect();
 
@@ -199,7 +240,11 @@ async function runSchemaBootstrap(): Promise<void> {
     await client.query("BEGIN");
     await client.query(SCHEMA_BOOTSTRAP_LOCK_SQL, [SCHEMA_BOOTSTRAP_LOCK_ID]);
     await client.query(CREATE_TABLES_SQL);
-    await client.query(BACKFILL_EMPLOYEE_FULL_NAMES_SQL);
+    const generatedFullName = await isFullNameGeneratedColumn(client);
+
+    if (!generatedFullName) {
+      await client.query(BACKFILL_EMPLOYEE_FULL_NAMES_SQL);
+    }
     await client.query("COMMIT");
   } catch (error) {
     try {

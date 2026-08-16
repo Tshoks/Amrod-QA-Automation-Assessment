@@ -34,6 +34,7 @@ export class LoginPage extends BasePage {
 
   async clickLoginButton(): Promise<this> {
     await this.click(this.loginElements.getLoginButton());
+    await this.page.waitForTimeout(1500);
     return this;
   }
 

@@ -1,6 +1,7 @@
 name: Playwright CI
 
 on:
+
   push:
     branches:
       - main

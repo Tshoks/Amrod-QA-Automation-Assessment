@@ -162,6 +162,7 @@ const getDbConfig = (): DbConfig => {
 const dbConfig = getDbConfig();
 
 let pool: Pool | null = null;
+let schemaBootstrapped = false;
 let schemaBootstrapPromise: Promise<void> | null = null;
 
 export function buildEmployeeFullName(
@@ -214,13 +215,21 @@ async function runSchemaBootstrap(): Promise<void> {
 }
 
 export async function createDatabaseTables(): Promise<void> {
+  if (schemaBootstrapped) {
+    return;
+  }
+
   if (!schemaBootstrapPromise) {
-    schemaBootstrapPromise = runSchemaBootstrap().finally(() => {
-      schemaBootstrapPromise = null;
+    schemaBootstrapPromise = runSchemaBootstrap().then(() => {
+      schemaBootstrapped = true;
     });
   }
 
-  await schemaBootstrapPromise;
+  try {
+    await schemaBootstrapPromise;
+  } finally {
+    schemaBootstrapPromise = null;
+  }
 }
 
 async function upsertPositiveTestData(
@@ -474,6 +483,8 @@ export async function closeDb(): Promise<void> {
 
   const activePool = pool;
   pool = null;
+  schemaBootstrapped = false;
+  schemaBootstrapPromise = null;
   await activePool.end();
 }
 

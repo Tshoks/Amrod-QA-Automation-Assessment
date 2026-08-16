@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+if not defined BASE_URL set BASE_URL=https://opensource-demo.orangehrmlive.com
+
 echo Installing dependencies...
 call npm install
 if errorlevel 1 exit /b %errorlevel%

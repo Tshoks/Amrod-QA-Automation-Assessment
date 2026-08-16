@@ -58,7 +58,7 @@ jobs:
         run: npm ci
 
       - name: Run Prettier formatting check
-        run: npm run format:check
+        run: npx prettier --check .
 
   playwright-tests:
     runs-on: ubuntu-latest

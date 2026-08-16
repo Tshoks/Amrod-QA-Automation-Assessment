@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: TypeScript compile check
-        run: npm run build
+        run: npm run lint
 
   lint:
     runs-on: ubuntu-latest

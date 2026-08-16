@@ -48,10 +48,10 @@ Ensure the following are installed:
   npx playwright test --grep @sanity
 - Run regression tests:
   npx playwright test --grep @regression
-- Run tests in headed mode
-| npx playwright test --headed
-- Run tests in a specific browser
-| npx playwright test --browser=chromium
+- Run tests in headed mode:
+  npx playwright test --headed
+- Run tests in a specific browser:
+  npx playwright test --project=chromium
 - Generate Allure report:
   npm run report:allure
 - View Allure report:

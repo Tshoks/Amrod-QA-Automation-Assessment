@@ -36,8 +36,9 @@ Ensure the following are installed:
 1. Clone the repository:
    ```bash
    git clone <repo-url>
-
-
+   cd <repo-folder>
+   npm ci
+   ```
 ## Running tests
 - Run all tests:
   npx playwright test

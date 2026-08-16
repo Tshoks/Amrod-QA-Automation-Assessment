@@ -7,10 +7,11 @@ const DEFAULT_NEON_CONNECTION_STRING = process.env.DEFAULT_NEON_CONNECTION_STRIN
 export const CREATE_TABLES_SQL = `
   CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
+    employee_id VARCHAR(50) UNIQUE,
     first_name VARCHAR(100) NOT NULL,
     middle_name VARCHAR(100),
     last_name VARCHAR(100) NOT NULL,
-    full_name VARCHAR(300) GENERATED ALWAYS AS (first_name || ' ' || middle_name || ' ' || last_name) STORED,
+    full_name VARCHAR(300) GENERATED ALWAYS AS (concat_ws(' ', first_name, middle_name, last_name)) STORED,
     employee_code VARCHAR(50) UNIQUE,
     created_at TIMESTAMP DEFAULT NOW()
   );

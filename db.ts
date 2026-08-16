@@ -3,9 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const DEFAULT_NEON_CONNECTION_STRING =
-  'postgresql://neondb_owner:npg_e6mRABlgEDd4@ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
-
+const DEFAULT_NEON_CONNECTION_STRING = process.env.DEFAULT_NEON_CONNECTION_STRING;
 export const CREATE_TABLES_SQL = `
   CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,

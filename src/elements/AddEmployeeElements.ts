@@ -1,12 +1,15 @@
 export class AddEmployeeElements {
-  private readonly addEmployeeHeader: string = '//h6[normalize-space()="Add Employee"]';
+  private readonly addEmployeeHeader: string =
+    '//h6[normalize-space()="Add Employee"]';
   private readonly firstNameInput: string = 'input[name="firstName"]';
   private readonly middleNameInput: string = 'input[name="middleName"]';
   private readonly lastNameInput: string = 'input[name="lastName"]';
-  private readonly employeeIdInput: string = '//label[normalize-space()="Employee Id"]/ancestor::div[contains(@class,"oxd-input-group")]//input';
+  private readonly employeeIdInput: string =
+    '//label[normalize-space()="Employee Id"]/ancestor::div[contains(@class,"oxd-input-group")]//input';
   private readonly saveButton: string = '//button[normalize-space()="Save"]';
   private readonly toastNotification: string = ".oxd-toast";
-  private readonly requiredFieldError: string = ".oxd-input-field-error-message";
+  private readonly requiredFieldError: string =
+    ".oxd-input-field-error-message";
 
   public getAddEmployeeHeader(): string {
     return this.addEmployeeHeader;

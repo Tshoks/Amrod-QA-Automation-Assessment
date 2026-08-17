@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+chcp 65001 >nul
+
 if not defined BASE_URL set BASE_URL=https://opensource-demo.orangehrmlive.com
 
 echo Installing dependencies...

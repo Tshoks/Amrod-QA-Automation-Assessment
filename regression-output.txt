@@ -6,7 +6,7 @@
 > amrod-qa-automation-assessment@1.0.0 pretest:db
 > ts-node scripts/check-db-readiness.ts
 
-(node:31224) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:37544) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -16,7 +16,7 @@ To prepare for this change:
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
 DB readiness check passed: connected to ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb.
-(node:11220) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:4524) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -27,3 +27,49 @@ See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode de
 (Use `node --trace-warnings ...` to show where the warning was created)
 Playwright global setup: database ready at ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb.
 
+Running 15 tests using 1 worker
+
+(node:25664) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › src\tests\regression\pim-regression.spec.ts:76:9 › PIM regression suite › PIM employee lifecycle regression @regression (39.6s)
+  ✓   2 [chromium] › src\tests\regression\pim-regression.spec.ts:222:9 › PIM regression suite › Invalid employee creation validation @regression (12.6s)
+  ✓   3 [chromium] › src\tests\regression\pim-regression.spec.ts:260:9 › PIM regression suite › Missing required fields validation @regression (13.0s)
+  ✓   4 [chromium] › src\tests\regression\pim-regression.spec.ts:298:9 › PIM regression suite › Invalid date format validation @regression (18.6s)
+  ✓   5 [chromium] › src\tests\regression\pim-regression.spec.ts:339:9 › PIM regression suite › Invalid dropdown selection validation @regression (18.5s)
+(node:24592) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   6 [firefox] › src\tests\regression\pim-regression.spec.ts:76:9 › PIM regression suite › PIM employee lifecycle regression @regression (40.6s)
+  ✓   7 [firefox] › src\tests\regression\pim-regression.spec.ts:222:9 › PIM regression suite › Invalid employee creation validation @regression (18.2s)
+  ✓   8 [firefox] › src\tests\regression\pim-regression.spec.ts:260:9 › PIM regression suite › Missing required fields validation @regression (16.4s)
+  ✓   9 [firefox] › src\tests\regression\pim-regression.spec.ts:298:9 › PIM regression suite › Invalid date format validation @regression (21.0s)
+  ✓  10 [firefox] › src\tests\regression\pim-regression.spec.ts:339:9 › PIM regression suite › Invalid dropdown selection validation @regression (20.2s)
+(node:27368) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  11 [webkit] › src\tests\regression\pim-regression.spec.ts:76:9 › PIM regression suite › PIM employee lifecycle regression @regression (42.9s)
+  ✓  12 [webkit] › src\tests\regression\pim-regression.spec.ts:222:9 › PIM regression suite › Invalid employee creation validation @regression (14.4s)
+  ✓  13 [webkit] › src\tests\regression\pim-regression.spec.ts:260:9 › PIM regression suite › Missing required fields validation @regression (13.6s)
+  ✓  14 [webkit] › src\tests\regression\pim-regression.spec.ts:298:9 › PIM regression suite › Invalid date format validation @regression (20.5s)
+  ✓  15 [webkit] › src\tests\regression\pim-regression.spec.ts:339:9 › PIM regression suite › Invalid dropdown selection validation @regression (20.8s)
+
+  15 passed (5.9m)

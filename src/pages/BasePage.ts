@@ -38,7 +38,7 @@ export class BasePage {
   async click(locator: string): Promise<void> {
     await test.step(`Click ${locator}`, async () => {
       try {
-        await this.page.locator(locator).click();
+        await this.page.locator(locator).click({ timeout: 30000 });
         await this.page.waitForTimeout(500);
       } catch (error) {
         await this.captureFailureScreenshot(`click-${locator}`);
@@ -86,7 +86,10 @@ export class BasePage {
   async waitForVisible(locator: string): Promise<void> {
     await test.step(`Wait for visible ${locator}`, async () => {
       try {
-        await this.page.locator(locator).waitFor({ state: "visible" });
+        await this.page.locator(locator).waitFor({
+          state: "visible",
+          timeout: 60000,
+        });
       } catch (error) {
         await this.captureFailureScreenshot(`wait-visible-${locator}`);
         throw new Error(this.formatError("Wait for visible", locator, error));

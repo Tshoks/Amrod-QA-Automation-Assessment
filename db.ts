@@ -81,6 +81,9 @@ const BACKFILL_EMPLOYEE_FULL_NAMES_SQL = `UPDATE employees
        ''
      )
      WHERE full_name IS NULL`;
+const COMPAT_ADD_EMPLOYEE_ID_COLUMN_SQL = `ALTER TABLE employees ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50)`;
+const COMPAT_ADD_FULL_NAME_COLUMN_SQL = `ALTER TABLE employees ADD COLUMN IF NOT EXISTS full_name VARCHAR(300)`;
+const COMPAT_ADD_EMPLOYEE_ID_UNIQUE_INDEX_SQL = `CREATE UNIQUE INDEX IF NOT EXISTS employees_employee_id_key ON employees (employee_id)`;
 const FULL_NAME_GENERATION_METADATA_SQL = `SELECT is_generated
      FROM information_schema.columns
      WHERE table_schema = current_schema()
@@ -240,6 +243,10 @@ async function runSchemaBootstrap(): Promise<void> {
     await client.query("BEGIN");
     await client.query(SCHEMA_BOOTSTRAP_LOCK_SQL, [SCHEMA_BOOTSTRAP_LOCK_ID]);
     await client.query(CREATE_TABLES_SQL);
+    // Compatibility migration for legacy employee tables created before employee_id/full_name columns existed.
+    await client.query(COMPAT_ADD_EMPLOYEE_ID_COLUMN_SQL);
+    await client.query(COMPAT_ADD_FULL_NAME_COLUMN_SQL);
+    await client.query(COMPAT_ADD_EMPLOYEE_ID_UNIQUE_INDEX_SQL);
     const generatedFullName = await isFullNameGeneratedColumn(client);
 
     if (!generatedFullName) {
@@ -513,12 +520,25 @@ export async function writeEmployeeData(
     payload.last_name ?? existingEmployee?.last_name,
   );
 
-  const params = [employeeId, ...keys.map((key) => payload[key]), fullName];
+  const generatedFullNameResult = await getPool().query<{
+    is_generated?: string;
+  }>(FULL_NAME_GENERATION_METADATA_SQL);
+  const isGeneratedFullName =
+    (generatedFullNameResult.rows[0]?.is_generated ?? "NEVER") !== "NEVER";
 
-  await getPool().query(
-    `INSERT INTO employees (employee_id, ${columns}, full_name) VALUES ($1, ${insertValues}, $${keys.length + 2}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}, full_name = $${keys.length + 2}`,
-    params,
-  );
+  if (isGeneratedFullName) {
+    const params = [employeeId, ...keys.map((key) => payload[key])];
+    await getPool().query(
+      `INSERT INTO employees (employee_id, ${columns}) VALUES ($1, ${insertValues}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}`,
+      params,
+    );
+  } else {
+    const params = [employeeId, ...keys.map((key) => payload[key]), fullName];
+    await getPool().query(
+      `INSERT INTO employees (employee_id, ${columns}, full_name) VALUES ($1, ${insertValues}, $${keys.length + 2}) ON CONFLICT (employee_id) DO UPDATE SET ${updateSet}, full_name = $${keys.length + 2}`,
+      params,
+    );
+  }
 
   return {
     employee_id: employeeId,

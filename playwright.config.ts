@@ -12,6 +12,7 @@ export default defineConfig({
     timeout: 10000,
   },
   fullyParallel: true,
+  workers: 1,
   reporter: [["list"], ["allure-playwright", { detail: true }]],
   use: {
     baseURL: process.env.BASE_URL,

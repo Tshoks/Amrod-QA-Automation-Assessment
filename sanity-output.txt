@@ -6,7 +6,7 @@
 > amrod-qa-automation-assessment@1.0.0 pretest:db
 > ts-node scripts/check-db-readiness.ts
 
-(node:14524) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:42956) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -16,7 +16,7 @@ To prepare for this change:
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
 DB readiness check passed: connected to ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb.
-(node:28408) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:10932) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -27,9 +27,9 @@ See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode de
 (Use `node --trace-warnings ...` to show where the warning was created)
 Playwright global setup: database ready at ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb.
 
-Running 9 tests using 8 workers
+Running 9 tests using 1 worker
 
-(node:25108) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:41316) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -38,7 +38,10 @@ To prepare for this change:
 
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:28900) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+  ✓  1 [chromium] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (9.6s)
+  ✓  2 [chromium] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (7.0s)
+  ✓  3 [chromium] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (7.0s)
+(node:27920) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -47,7 +50,10 @@ To prepare for this change:
 
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:31820) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+  ✓  4 [firefox] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (11.5s)
+  ✓  5 [firefox] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (7.5s)
+  ✓  6 [firefox] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (6.7s)
+(node:33212) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -56,68 +62,8 @@ To prepare for this change:
 
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:13044) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+  ✓  7 [webkit] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (12.8s)
+  ✓  8 [webkit] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (8.0s)
+  ✓  9 [webkit] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (8.5s)
 
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:34896) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
-
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:18712) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
-
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:35344) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
-
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:37524) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
-
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-  ✓  2 [chromium] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (8.1s)
-(node:31884) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
-In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
-
-To prepare for this change:
-- If you want the current behavior, explicitly use 'sslmode=verify-full'
-- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
-
-See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
-(Use `node --trace-warnings ...` to show where the warning was created)
-  ✓  1 [chromium] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (9.9s)
-  ✓  4 [webkit] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (9.5s)
-  ✓  3 [chromium] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (8.5s)
-  ✓  7 [firefox] › src\tests\sanity\Login.test.ts:69:9 › Login with invalid credentials @sanity (10.8s)
-  ✓  8 [firefox] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (9.2s)
-  ✓  5 [firefox] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (13.5s)
-  ✓  6 [webkit] › src\tests\sanity\Login.test.ts:33:9 › Login with valid credentials @sanity (15.2s)
-  ✓  9 [webkit] › src\tests\sanity\Login.test.ts:108:9 › Login required field validation @sanity (8.2s)
-
-  9 passed (37.7s)
+  9 passed (1.7m)

@@ -6,7 +6,7 @@
 > amrod-qa-automation-assessment@1.0.0 pretest:db
 > ts-node scripts/check-db-readiness.ts
 
-(node:21084) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:41160) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -16,7 +16,7 @@ To prepare for this change:
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
 DB readiness check passed: connected to ep-bold-grass-zaupffc8-pooler.c-2.eu-west-2.aws.neon.tech/neondb.
-(node:24220) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+(node:40844) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -29,10 +29,10 @@ Playwright global setup: database ready at ep-bold-grass-zaupffc8-pooler.c-2.eu-
 
 Running 4 tests using 4 workers
 
-  ✓  1 [chromium] › src\tests\smoke\Database.test.ts:14:5 › full_name is composed in application code @smoke (8ms)
-  ✓  2 [chromium] › src\tests\smoke\Database.test.ts:9:5 › employees schema keeps full_name as a plain column @smoke (7ms)
-  ✓  3 [chromium] › src\tests\smoke\Database.test.ts:20:5 › schema bootstrap uses a transaction-scoped advisory lock @smoke (6ms)
-(node:23860) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+  ✓  1 [chromium] › src\tests\smoke\Database.test.ts:9:5 › employees schema keeps full_name as a plain column @smoke (7ms)
+  ✓  2 [chromium] › src\tests\smoke\Database.test.ts:14:5 › full_name is composed in application code @smoke (7ms)
+  ✓  3 [chromium] › src\tests\smoke\Database.test.ts:20:5 › schema bootstrap uses a transaction-scoped advisory lock @smoke (8ms)
+(node:24644) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
 In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
 
 To prepare for this change:
@@ -41,6 +41,6 @@ To prepare for this change:
 
 See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ✓  4 [chromium] › src\tests\smoke\SideMenu.test.ts:20:9 › Side menu smoke navigation from login @smoke (39.7s)
+  ✓  4 [chromium] › src\tests\smoke\SideMenu.test.ts:20:9 › Side menu smoke navigation from login @smoke (33.0s)
 
-  4 passed (48.1s)
+  4 passed (42.5s)
